@@ -92,7 +92,7 @@ function ballMove () {
   }
   // Ball bounces off left paddle
   if (ball.x <= 20) {
-    if (ball.y > paddle1.y && ball.y < paddle1.y + paddle1.height) {
+    if (ball.y > paddle1.y-10 && ball.y < paddle1.y + paddle1.height + 10) {
       ball.xVelocity = -ball.xVelocity;
       let deltaY = ball.y - (paddle1.y + paddle1.height/2);
       ball.yVelocity = deltaY*0.3;
@@ -103,7 +103,7 @@ function ballMove () {
   }
   // Ball bounces off right paddle
   if (ball.x >= canvas.width-20) {
-    if (ball.y > paddle2.y && ball.y < paddle2.y + paddle2.height) {
+    if (ball.y > paddle2.y-10 && ball.y < paddle2.y + paddle2.height +10) {
       ball.xVelocity = -ball.xVelocity;
       let deltaY = ball.y - (paddle2.y + paddle2.height/2);
       ball.yVelocity = deltaY*0.3;
