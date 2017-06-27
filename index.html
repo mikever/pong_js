@@ -23,7 +23,14 @@ function Ball (x, y, xVel, yVel, diameter, color) {
   this.xVelocity = xVel;
   this.yVelocity = yVel;
   this.diameter = diameter;
-  this.color = color;
+  let randNum = rand(1,10);
+
+  if (randNum === 1) {
+    this.color = 'white';
+  } else {
+    this.color = color;
+  }
+  console.log(randNum);
 }
 
 // Objects
@@ -96,7 +103,7 @@ function ballMove () {
       ball.xVelocity = -ball.xVelocity;
       let deltaY = ball.y - (paddle1.y + paddle1.height/2);
       ball.yVelocity = deltaY*0.3;
-    } else {
+    } else if (ball.x < 0) {
       score2.value++;
       reset();
     }
@@ -107,7 +114,7 @@ function ballMove () {
       ball.xVelocity = -ball.xVelocity;
       let deltaY = ball.y - (paddle2.y + paddle2.height/2);
       ball.yVelocity = deltaY*0.3;
-    } else {
+    } else if (ball.x > canvas.width) {
       score1.value++;
       reset();
     }
@@ -123,6 +130,10 @@ function AIMove () {
   if (paddle2.y+paddle2.height/2 > ball.y || paddle2.y+paddle2.height/2 > ball.y+10) {
     paddle2.y -= aiSpeed;
   }
+}
+
+function rand (min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 </script>
