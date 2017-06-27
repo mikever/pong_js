@@ -2,91 +2,127 @@
 
 <script type="text/javascript">
 
-  p1y = p2y = 40;
-  pthick = 10;
-  pheight = 100;
-  ballx = bally = 50;
-  bd = 6;
-  xvel = yvel = 10;
-  score1 = score2 = 0;
-  aiSpeed = 8;
+// Prototypes
+function Paddle (yValue, thickness, height, color) {
+  this.y = yValue;
+  this.thick = thickness;
+  this.height = height;
+  this.color = color;
+}
 
-  window.onload = ()=> {
-    c = document.getElementById('gc');
-    cc = c.getContext('2d');
-    cc.font = '20px Arial';
-    setInterval(update, 1000/30);
-    c.addEventListener('mousemove', (e)=> {
-      p1y = e.clientY-pheight/2;
-    });
+function Score (value, font, size, color) {
+  this.value = value;
+  this.font = font;
+  this.size = size;
+  this.color = color;
+}
+
+function Ball (x, y, xVel, yVel, diameter, color) {
+  this.x = x;
+  this.y = y;
+  this.xVelocity = xVel;
+  this.yVelocity = yVel;
+  this.diameter = diameter;
+  this.color = color;
+}
+
+// Objects
+// paddles
+const paddle1 = new Paddle(40, 10, 100, 'cyan');
+const paddle2 = new Paddle(40, 10, 100, 'lime');
+// scores
+const score1 = new Score(0, 'Arial', '20px', 'cyan');
+const score2 = new Score(0, 'Arial', '20px', 'lime');
+// ball
+const ball = new Ball(50, 50, 10, 10, 6, 'firebrick');
+
+window.onload = () => {
+  canvas = document.getElementById('gc');
+  context = canvas.getContext('2d');
+  context.font = '20px Arial';
+  setInterval(update, 1000/30);
+  canvas.addEventListener('mousemove', (e) => {
+    paddle1.y = e.clientY-paddle1.height/2;
+  });
+}
+
+function update () {
+  context.fillStyle = 'black';
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.fillStyle = paddle1.color;
+  context.fillRect(0, paddle1.y, paddle1.thick,
+    paddle1.height);
+  context.fillStyle = paddle2.color;
+  context.fillRect(canvas.width-paddle2.thick,
+    paddle2.y, paddle2.thick, paddle2.height);
+  context.fillStyle = score1.color;
+  context.fillText(score1.value, 100, 50)
+  context.fillStyle = score2.color;
+  context.fillText(score2.value, canvas.width-100, 50);
+  context.fillStyle = ball.color;
+  context.fillRect(ball.x-ball.diameter/2,
+    ball.y-ball.diameter/2, ball.diameter,
+    ball.diameter);
+
+  // ball moves, bounces around canvas
+  ballMove();
+
+  // AI controls right paddles
+  AIMove();
+}
+
+function reset () {
+  ball.x = canvas.width/2;
+  ball.y = canvas.height/2;
+  ball.xVelocity = - ball.xVelocity;
+  ball.yVelocity = 3;
+}
+
+function ballMove () {
+  // Move ball around axes
+  ball.x += ball.xVelocity;
+  ball.y += ball.yVelocity;
+  // Ball bounces off top
+  if (ball.y < 0 && ball.yVelocity < 0) {
+    ball.yVelocity = -ball.yVelocity;
   }
-
-  function reset() {
-    ballx = c.width/2;
-    ballyx = c.height/2;
-    xvel = -xvel;
-    yvel = 3;
+  // Ball bounces off bottom
+  if (ball.y > canvas.height && ball.yVelocity > 0) {
+    ball.yVelocity = -ball.yVelocity;
   }
-
-  function update() {
-    ballx += xvel;
-    bally += yvel;
-
-    if (bally < 0 && yvel < 0) {
-      yvel = -yvel;
+  // Ball bounces off left paddle
+  if (ball.x <= 20) {
+    if (ball.y > paddle1.y && ball.y < paddle1.y + paddle1.height) {
+      ball.xVelocity = -ball.xVelocity;
+      let deltaY = ball.y - (paddle1.y + paddle1.height/2);
+      ball.yVelocity = deltaY*0.3;
+    } else {
+      score2.value++;
+      reset();
     }
-
-    if (bally > c.height && yvel > 0) {
-      yvel = -yvel;
-    }
-
-    // Ball bouncing off left side
-    if (ballx < 0) {
-      if (bally > p1y && bally < p1y + pheight) {
-        xvel = -xvel;
-        deltaY = bally - (p1y + pheight/2);
-        yvel = deltaY*0.3;
-      } else {
-        score2++;
-        reset();
-      }
-    }
-
-    // Ball bouncing off right side
-    if (ballx > c.width) {
-      if (bally > p2y && bally < p2y + pheight) {
-        xvel = -xvel;
-        deltaY = bally - (p2y + pheight/2);
-        yvel = deltaY*0.3;
-      } else {
-        score1++;
-        reset();
-      }
-    }
-
-    // AI movement
-    if (p2y+pheight/2 < bally || p2y+pheight/2 < bally+10) {
-      p2y += aiSpeed;
-    }
-    if (p2y+pheight/2 > bally || p2y+pheight/2 > bally-10) {
-      p2y -= aiSpeed;
-    }
-
-    // Background, paddles, ball
-    cc.fillStyle = 'black';
-    cc.fillRect(0, 0, c.width, c.height);
-    // Ball
-    cc.fillStyle = 'firebrick';
-    cc.fillRect(ballx-bd/2, bally-bd/2, bd, bd);
-    // Paddle 1
-    cc.fillStyle = 'cyan';
-    cc.fillRect(0, p1y, pthick, pheight);
-    // Score 1
-    cc.fillText(score1, 100, 50);
-    // Paddle 2
-    cc.fillStyle = 'lime';
-    cc.fillRect(c.width-pthick, p2y, pthick, pheight);
-    // Score 2
-    cc.fillText(score2, c.width-100, 50);
   }
+  // Ball bounces off right paddle
+  if (ball.x >= canvas.width-20) {
+    if (ball.y > paddle2.y && ball.y < paddle2.y + paddle2.height) {
+      ball.xVelocity = -ball.xVelocity;
+      let deltaY = ball.y - (paddle2.y + paddle2.height/2);
+      ball.yVelocity = deltaY*0.3;
+    } else {
+      score1.value++;
+      reset();
+    }
+  }
+}
+
+function AIMove () {
+  let aiSpeed = 8;
+
+  if (paddle2.y+paddle2.height/2 < ball.y || paddle2.y+paddle2.height/2 < ball.y+10) {
+    paddle2.y += aiSpeed;
+  }
+  if (paddle2.y+paddle2.height/2 > ball.y || paddle2.y+paddle2.height/2 > ball.y+10) {
+    paddle2.y -= aiSpeed;
+  }
+}
+
 </script>
